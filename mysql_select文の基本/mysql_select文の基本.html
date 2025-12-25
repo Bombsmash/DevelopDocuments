@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>MySQL SELECT&#x6587;&#x306e;&#x57fa;&#x672c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="mysql-select文の基本">MySQL SELECT文の基本</h1>
+<!-- omit in toc -->
+<h2 id="はじめに">はじめに</h2>
+<p>本書は、MySQLのデータ操作言語（DDL）であるSELECT文の基本を網羅することを目的に記述する。<br>
+SELECT文も含めたMySQLの基本構文の簡易的説明に加えて、実際にA5M2でSQL実行を実践している「<a href="../mysql%E5%9F%BA%E6%9C%AC%E6%A7%8B%E6%96%87%E5%AE%9F%E8%B7%B5%E6%9B%B8/mysql%E5%9F%BA%E6%9C%AC%E6%A7%8B%E6%96%87%E5%AE%9F%E8%B7%B5%E6%9B%B8.html">MySQL基本構文実践書</a>」も併せて読むことを推奨する。</p>
+<!-- omit in toc -->
+<h2 id="目次">目次</h2>
+<ul>
+<li><a href="#select%E6%96%87%E3%81%AE%E6%A7%8B%E9%80%A0">SELECT文の構造</a>
+<ul>
+<li><a href="#select%E5%8F%A5">SELECT句</a>
+<ul>
+<li><a href="#%E5%85%A8%E3%81%A6%E3%81%AE%E3%82%AB%E3%83%A9%E3%83%A0%E3%82%92%E6%8A%BD%E5%87%BA%E3%81%99%E3%82%8B%E5%A0%B4%E5%90%88">全てのカラムを抽出する場合</a></li>
+<li><a href="#%E6%8A%BD%E5%87%BA%E3%81%97%E3%81%9F%E3%82%AB%E3%83%A9%E3%83%A0%E3%81%AB%E5%88%A5%E5%90%8D%E3%82%92%E3%81%A4%E3%81%91%E3%82%8B%E5%A0%B4%E5%90%88">抽出したカラムに別名をつける場合</a></li>
+</ul>
+</li>
+<li><a href="#where%E5%8F%A5">WHERE句</a>
+<ul>
+<li><a href="#null%E3%81%AE%E6%89%B1%E3%81%84">NULLの扱い</a></li>
+</ul>
+</li>
+<li><a href="#order-by%E5%8F%A5">ORDER BY句</a></li>
+<li><a href="#%E9%9B%86%E7%B4%84%E9%96%A2%E6%95%B0">集約関数</a>
+<ul>
+<li><a href="#%E3%83%AC%E3%82%B3%E3%83%BC%E3%83%89%E6%95%B0%E3%81%AE%E9%9B%86%E8%A8%88count%E9%96%A2%E6%95%B0">レコード数の集計（COUNT関数）</a></li>
+<li><a href="#%E6%95%B0%E5%80%A4%E3%81%AE%E9%9B%86%E8%A8%88sum%E9%96%A2%E6%95%B0avg%E9%96%A2%E6%95%B0max%E9%96%A2%E6%95%B0min%E9%96%A2%E6%95%B0">数値の集計（SUM関数/AVG関数/MAX関数/MIN関数）</a></li>
+<li><a href="#%E9%87%8D%E8%A4%87%E3%82%92%E9%99%A4%E3%81%84%E3%81%9F%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E6%8A%BD%E5%87%BAdistinct">重複を除いたデータの抽出（DISTINCT）</a></li>
+<li><a href="#%E9%87%8D%E8%A4%87%E3%82%92%E9%99%A4%E3%81%84%E3%81%9F%E3%83%AC%E3%82%B3%E3%83%BC%E3%83%89%E6%95%B0%E3%81%AE%E6%8A%BD%E5%87%BAdistinctcount">重複を除いたレコード数の抽出（DISTINCT×COUNT）</a></li>
+</ul>
+</li>
+<li><a href="#%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97%E5%8C%96group-by%E5%8F%A5">グループ化（GROUP BY句）</a></li>
+<li><a href="#%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97%E3%81%B8%E3%81%AE%E6%8A%BD%E5%87%BA%E6%9D%A1%E4%BB%B6%E3%82%92%E6%8C%87%E5%AE%9A%E3%81%99%E3%82%8Bhaving%E5%8F%A5">グループへの抽出条件を指定する（HAVING句）</a></li>
+<li><a href="#%E5%86%85%E9%83%A8%E7%B5%90%E5%90%88innner-join">内部結合（INNNER JOIN）</a></li>
+<li><a href="#%E5%A4%96%E9%83%A8%E7%B5%90%E5%90%88outer-join">外部結合（OUTER JOIN）</a>
+<ul>
+<li><a href="#right-outer-join">RIGHT OUTER JOIN</a></li>
+</ul>
+</li>
+<li><a href="#3%E3%81%A4%E4%BB%A5%E4%B8%8A%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E7%B5%90%E5%90%88">3つ以上のテーブル結合</a>
+<ul>
+<li><a href="#3%E3%81%A4%E4%BB%A5%E4%B8%8A%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%81%AE%E5%86%85%E9%83%A8%E7%B5%90%E5%90%88">3つ以上のテーブルの内部結合</a></li>
+<li><a href="#3%E3%81%A4%E4%BB%A5%E4%B8%8A%E3%81%AE%E3%83%86%E3%83%BC%E3%83%96%E3%83%AB%E3%81%AE%E5%A4%96%E9%83%A8%E7%B5%90%E5%90%88">3つ以上のテーブルの外部結合</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="select文の構造">SELECT文の構造</h2>
+<ul>
+<li>SELECT文各句の実行順</li>
+</ul>
+<pre><code>SELECT ID , NAME ,GENDER , BIRTHDAY , WEIGHT   /* SELECT句  ：2. どのカラムのデータを抽出するか */
+  FROM SAMPLE_4_1 ;                            /* FROM句    ：1. どのテーブルから */
+</code></pre>
+<h3 id="select句">SELECT句</h3>
+<h4 id="全てのカラムを抽出する場合">全てのカラムを抽出する場合</h4>
+<p>SELECT句で全てのカラムを抽出する場合、&quot;*&quot;を指定する。</p>
+<pre><code>SELECT *                /* &quot;*&quot;を指定すると、全てのカラムが対象になる */
+  FROM SAMPLE_4_1 ;
+</code></pre>
+<h4 id="抽出したカラムに別名をつける場合">抽出したカラムに別名をつける場合</h4>
+<p>SELECT句でカラム名の後ろに&quot;AS ～&quot;とつけると、～という名前のエイリアスを作ることができる。<br>
+なお、エイリアス名は日本語（&quot;ペットID&quot;など）でもよい。  s</p>
+<pre><code>SELECT  ID       AS PET_ID       ,      /* 物理名&quot;ID&quot;       → エイリアス&quot;PET_ID&quot;         */
+        NAME     AS PET_NAME     ,      /* 物理名&quot;NAME&quot;     → エイリアス&quot;PET_NAME&quot;       */
+        GENDER   AS PET_GENDER   ,      /* 物理名&quot;GENDER&quot;   → エイリアス&quot;PET_GENDER&quot;     */
+        BIRTHDAY AS PET_BIRTHDAY ,      /* 物理名&quot;BIRTHDAY&quot; → エイリアス&quot;PET_BIRTHDAY&quot;   */
+        WEIGHT   AS PET_WEIGHT          /* 物理名&quot;WEIGHT&quot;   → エイリアス&quot;PET_WEIGHT&quot;     */
+ FROM SAMPLE_4_1 ;
+</code></pre>
+<h3 id="where句">WHERE句</h3>
+<p>WHWRE句では、SELECT句で取得するデータの対象行を指定するための条件式を記述する。条件式は下記に示す論理演算子を組み合わせて作成する。</p>
+<ul>
+<li>SELECT文中での実行順</li>
+</ul>
+<pre><code>SELECT ID , NAME ,GENDER , BIRTHDAY , WEIGHT        /* 3. どのカラムのデータを抽出するか */
+ FROM SAMPLE_4_1                                    /* 1. どのテーブルから */
+ WHERE GENDER = 'M’                                 /* 2. どの行の */
+ AND WEIGHT &gt; 6.2
+</code></pre>
+<ul>
+<li>WHWRE句で扱う演算子一覧</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>演算子</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>=</td>
+<td>左辺と右辺が等しければ真</td>
+</tr>
+<tr>
+<td>!=<br>&lt;&gt;</td>
+<td>左辺と右辺が等しくなければ真</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>左辺が右辺よりも大きければ真</td>
+</tr>
+<tr>
+<td>&gt;=</td>
+<td>左辺が右辺以上であれば真</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>左辺が右辺よりも小さければ真</td>
+</tr>
+<tr>
+<td>&lt;=</td>
+<td>左辺が右辺以下であれば真</td>
+</tr>
+<tr>
+<td>AND</td>
+<td>2つの条件を結合し、両方とも真であれば真</td>
+</tr>
+<tr>
+<td>OR</td>
+<td>2つの条件を結合し、どちらか一方でも真であれば真</td>
+</tr>
+<tr>
+<td>NOT</td>
+<td>結果を反転（真であれば偽、偽であれば真）</td>
+</tr>
+<tr>
+<td>BETWEEN 値a AND 値b</td>
+<td>値a以上、値b以下の範囲内であれば真</td>
+</tr>
+<tr>
+<td>IN</td>
+<td>対象のフィールドが（）内の値のいずれかと一致すれば真</td>
+</tr>
+<tr>
+<td>LIKE</td>
+<td>対象のフィールドがパターンに一致すれば真</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>論理演算子の優先順位：NOT &gt; AND &gt; OR</p>
+</li>
+<li>
+<p>WHWRE句SQL文例</p>
+</li>
+</ul>
+<pre><code>SELECT *
+  FROM SAMPLE_4_1
+ WHERE NAME IN ('MOCO','TARO','RINRIN') ; /* カラム「NAME」の値が'MOCO'.'TARO','RINRIN'のいずれかであれば抽出する。 */
+</code></pre>
+<pre><code>SELECT *
+  FROM SAMPLE_4_1
+ WHERE NAME NOT IN ('MOCO','TARO','RINRIN') ; /* カラム「NAME」の値が'MOCO'.'TARO','RINRIN'のいずれにも該当しなければ抽出する。 */
+</code></pre>
+<pre><code>SELECT *
+  FROM SAMPLE_4_1
+ WHERE BIRTHDAY LIKE '2013%' ; /* カラム「BIRTHDAY」の値が'2013'から始まっていれば抽出する。 */
+</code></pre>
+<pre><code>SELECT *
+  FROM SAMPLE_4_1
+ WHERE WEIGHT BETWEEN 5.0 AND 8.0 ; /* カラム「WEIGHT」の値が5.0以上8.0以下であれば抽出する。 */
+</code></pre>
+<h4 id="nullの扱い">NULLの扱い</h4>
+<p>比較演算子でNULLを比較しようとすると、思わぬエラーになることがある。<br>
+（NULLと比較するとほとんどの場合、結果がTRUEでもFALSEでもなくNULL（不明）になってしまう）<br>
+→<strong>IS NULL</strong>、<strong>IS NOT NULL</strong>を用いる。</p>
+<pre><code>SELECT *
+ FROM SAMPLE_4_2
+ WHERE PET_ID IS NULL ; /* PET_IDがNULLであれば抽出する。 */
+</code></pre>
+<pre><code>SELECT *
+ FROM SAMPLE_4_2
+ WHERE PET_ID IS NOT NULL ; /* PET_IDがNULLでなければ抽出する。 */
+</code></pre>
+<h3 id="order-by句">ORDER BY句</h3>
+<p>ORDER BY句では、抽出したデータをどう並び替えて表示させるかを指定する。</p>
+<ul>
+<li>SELECT文中での実行順</li>
+</ul>
+<pre><code> SELECT ID , NAME ,GENDER , BIRTHDAY , WEIGHT   /* 3. どのカラムのデータを抽出して */
+ FROM SAMPLE_4_1                                /* 1. どのテーブルから */
+ WHERE GENDER = 'M’                             /* 2. どの行の */
+ ORDER BY BIRTHDAY , WEIGHT DESC                /* 4. どう並び替えて表示させるか */
+</code></pre>
+<ul>
+<li>ORDER BY の後ろに、優先順位順にカラムを指定する。カラム名の後ろに'DESC'をつけると降順になり、何もつけなければ昇順になる。</li>
+</ul>
+<pre><code> ORDER BY BIRTHDAY , WEIGHT DESC   /* 優先順位1：BIRTHDAY（昇順）、優先順位2：WEIGHT（降順） */
+</code></pre>
+<h3 id="集約関数">集約関数</h3>
+<p>SQLでもExcelと同じように集約関数が存在する。</p>
+<table>
+<thead>
+<tr>
+<th>関数名</th>
+<th>機能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COUNT</td>
+<td>レコード数を求める</td>
+</tr>
+<tr>
+<td>SUM</td>
+<td>数値データ列の合計値を求める</td>
+</tr>
+<tr>
+<td>AVG</td>
+<td>数値データ列の平均値を求める</td>
+</tr>
+<tr>
+<td>MAX</td>
+<td>数値データ列の最大値を求める</td>
+</tr>
+<tr>
+<td>MIN</td>
+<td>数値データ列の最小値を求める</td>
+</tr>
+</tbody>
+</table>
+<h4 id="レコード数の集計count関数">レコード数の集計（COUNT関数）</h4>
+<pre><code>SELECT COUNT(*) , COUNT(PET_ID)   /* 2. 全レコード数と、PET_IDのデータ数(NULLを除く)を抽出する。 */
+  FROM SAMPLE_4_2 ;               /* 1. SAMPLE_4_2テーブルの、 */
+</code></pre>
+<h4 id="数値の集計sum関数avg関数max関数min関数">数値の集計（SUM関数/AVG関数/MAX関数/MIN関数）</h4>
+<pre><code>SELECT SUM(WEIGHT) ,  /* 2. WEIGHTの合計値と、                */
+ AVG(WEIGHT) ,        /*    WEIGHTの平均値と、                */
+ MAX(WEIGHT) ,        /*    WEIGHTの最大値と、                */
+ MIN(WEIGHT)          /*    WEIGHTの最小値を抽出して取得する。  */
+ FROM SAMPLE_4_1 ;    /* 1. SAMPLE_4_1テーブルの、 */
+</code></pre>
+<h4 id="重複を除いたデータの抽出distinct">重複を除いたデータの抽出（DISTINCT）</h4>
+<pre><code>SELECT DISTINCT GENDER  /* GENDERの値を重複を除いて取得する。 */
+  FROM SAMPLE_4_1 ;     /* SAMPLE4_1テーブルの、 */
+</code></pre>
+<h4 id="重複を除いたレコード数の抽出distinctcount">重複を除いたレコード数の抽出（DISTINCT×COUNT）</h4>
+<pre><code>SELECT COUNT( DISTINCT GENDER )  /* GENDERの値の候補値の数を取得する。 */
+  FROM SAMPLE_4_1 ;              /* SAMPLE4_1テーブルの、 */
+</code></pre>
+<h3 id="グループ化group-by句">グループ化（GROUP BY句）</h3>
+<ul>
+<li>SELECT文中での実行順</li>
+</ul>
+<pre><code>SELECT SCHOOL_NAME AS SCHOOL_NAME   ,                           /* 4. どのカラムのデータを抽出して */
+       MAX(SCORE)  AS HIGH_SCORE    ,
+       AVG(SCORE)  AS AVERAGE_SCORE
+  FROM SAMPLE_4_4                                               /* 1. どのテーブルの */
+ WHERE SCHOOL_NAME IS NOT NULL                                  /* 2. どの行を */
+ GROUP BY SCHOOL_NAME                                           /* 3. どの集約キーでグループ化してデータ表を作り、 */
+ ORDER BY HIGH_SCORE DESC , AVERAGE_SCORE DESC , SCHOOL_NAME ;  /* 5. どう並び替えて表示させるか */
+</code></pre>
+<p>上の例の場合、SCHOOL_NAMEの値ごとにレコードをまとめて（SCHOOL_NAME別のデータ表を作って）それぞれの表で、MAX(SCORE),AVG(SCORE)を計算し、結果を出力する。<br>
+参考までに出力結果のイメージを以下に示す。</p>
+<ul>
+<li>元の表（SAMPLE_4_4）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>NAME</th>
+<th>SCHOOLE_NAME</th>
+<th>SCORE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>MOCO</td>
+<td>SCHOOL_A</td>
+<td>90</td>
+</tr>
+<tr>
+<td>2</td>
+<td>PECO</td>
+<td>SCHOOL_B</td>
+<td>90</td>
+</tr>
+<tr>
+<td>3</td>
+<td>MIKA</td>
+<td>SCHOOL_A</td>
+<td>92</td>
+</tr>
+<tr>
+<td>4</td>
+<td>POCHA</td>
+<td>SCHOOL_C</td>
+<td>90</td>
+</tr>
+<tr>
+<td>~</td>
+<td>~</td>
+<td>~</td>
+<td>~</td>
+</tr>
+<tr>
+<td>~</td>
+<td>~</td>
+<td>~</td>
+<td>~</td>
+</tr>
+<tr>
+<td>~</td>
+<td>~</td>
+<td>~</td>
+<td>~</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>SQL文の出力結果</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>SCHOOL_NAME</th>
+<th>HIGH_SCORE</th>
+<th>AVERAGE_SCORE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SCHOOL_A</td>
+<td>92</td>
+<td>74</td>
+</tr>
+<tr>
+<td>SCHOOL_B</td>
+<td>90</td>
+<td>76</td>
+</tr>
+<tr>
+<td>SCHOOL_C</td>
+<td>90</td>
+<td>68</td>
+</tr>
+</tbody>
+</table>
+<h3 id="グループへの抽出条件を指定するhaving句">グループへの抽出条件を指定する（HAVING句）</h3>
+<p>HAVING句では、「GROUOP BY」でグループ化された後の集計結果に対して、抽出条件を指定することができる。<br>
+WHERE句との違いは以下の通り。</p>
+<table>
+<thead>
+<tr>
+<th>比較項目</th>
+<th>WHWRE句</th>
+<th>HAVING句</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>適用タイミング</td>
+<td>グループ化前</td>
+<td>グループ化後</td>
+</tr>
+<tr>
+<td>使用可能な条件</td>
+<td>個々の行に対する条件</td>
+<td>集計関数（COUNT,SUM,AVGなど）を使った条件</td>
+</tr>
+<tr>
+<td>例</td>
+<td>WHWRE salary &gt; 50000</td>
+<td>HAVING AVG(salary) &gt; 50000</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>SELECT文中での実行順</li>
+</ul>
+<pre><code>SELECT SCHOOL_NAME AS SCHOOL_NAME   ,                           /* 5. どのカラムのデータを抽出して  
+       MAX(SCORE)  AS HIGH_SCORE    ,                           
+       AVG(SCORE)  AS AVERAGE_SCORE
+  FROM SAMPLE_4_4                                               /* 1. どのテーブルの */
+ WHERE SCHOOL_NAME IS NOT NULL                                  /* 2. どの行を */
+ GROUP BY SCHOOL_NAME                                           /* 3. どの集約キーでグループ化して データ表を作り、 */
+HAVING COUNT(*) &gt;= 3                                            /* 4. どの行の、
+ ORDER BY HIGH_SCORE DESC , AVERAGE_SCORE DESC , SCHOOL_NAME ;  /* 6. どう並び替えて表示させるか */
+</code></pre>
+<h3 id="内部結合innner-join">内部結合（INNNER JOIN）</h3>
+<p>内部結合を用いることで、複数のテーブルの共通する値をもとに、対応する行だけを結合して表示することができる。<br>
+例えば、ペットの情報を管理する「SAMPLE_4_1」と家庭の情報を管理する「SAMPLE_4_2」を内部結合すると以下のようになる。
+また、非推奨ではあるが、INNNER JOIN句を使わずにWHWRE句で実装することもできる。</p>
+<ul>
+<li>SAMPLE4_1</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>NAME</th>
+<th>GENDER</th>
+<th>BIRTHDAY</th>
+<th>WEIGHT</th>
+<th>REGIST_TIMESTAMP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>MOCO</td>
+<td>F</td>
+<td>2014/05/04</td>
+<td>3.5</td>
+<td>2018/07/09 4:35:36</td>
+</tr>
+<tr>
+<td>2</td>
+<td>CHOKO</td>
+<td>M</td>
+<td>2011/08/25</td>
+<td>5.2</td>
+<td>2018/07/09 4:35:36</td>
+</tr>
+<tr>
+<td>3</td>
+<td>TARO</td>
+<td>M</td>
+<td>2013/01/02</td>
+<td>7.9</td>
+<td>2018/07/09 4:35:36</td>
+</tr>
+<tr>
+<td>4</td>
+<td>RINRIN</td>
+<td>F</td>
+<td>2015/12/12</td>
+<td>6.2</td>
+<td>2018/07/09 4:35:36</td>
+</tr>
+<tr>
+<td>5</td>
+<td>CHAMP</td>
+<td>M</td>
+<td>2013/01/02</td>
+<td>10.9</td>
+<td>2018/07/09 4:35:36</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>SAMPLE4_2</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>HOME_ID</th>
+<th>HOME_NAME</th>
+<th>PET_ID</th>
+<th>AREA_ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>OKAMOTO_KE</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>TANAKA_KE</td>
+<td>NULL</td>
+<td>NULL</td>
+</tr>
+<tr>
+<td>3</td>
+<td>SUZUKI_KE</td>
+<td>5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>IKEDA_KE</td>
+<td>NULL</td>
+<td>4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>TAKAHASHI_KE</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>NAGASAWA_KE</td>
+<td>3</td>
+<td>NULL</td>
+</tr>
+<tr>
+<td>7</td>
+<td>TAKIMIZU_KE</td>
+<td>4</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>SQL-INNNER_JOINを用いる場合（エイリアス名 a,bは省略可能）</p>
+<pre><code>SELECT b.HOME_ID , b.HOME_NAME , a.NAME                         /* 2. SAMPLE_4_2のHOME_ID,HOME_NAME、SAMPLE_4_1のPET_IDのカラムのデータを抽出して */
+  FROM SAMPLE_4_1 a INNER JOIN SAMPLE_4_2 b ON b.PET_ID = a.ID  /* 1. SAMPLE_4_1のIDとSAMPLE_4_2のPET_IDを結合キーとして内部結合したテーブルの */
+ ORDER BY b.HOME_ID ;                                           /* 3. HOME_IDの昇順に並び替えて表示する。 */
+</code></pre>
+<p>SQL-WHEREを用いる場合（非推奨）（エイリアス名 a,bは省略可能）</p>
+<pre><code>SELECT b.HOME_ID , b.HOME_NAME , a.NAME   /* 3. SAMPLE_4_2のHOME_ID,HOME_NAME、SAMPLE_4_1のPET_IDのカラムのデータを抽出して */
+  FROM SAMPLE_4_1 a ,                     /* 1. SAMPLE4_1とSAMPLE4_2のテーブルの */
+       SAMPLE_4_2 b
+ WHERE b.PET_ID  = a.ID                   /* 2. SAMPLE4_2のPET_IDとSAMPLE4_1のIDが一致する行を */
+ ORDER BY b.HOME_ID ;                     /* 4. HOME_IDの昇順に並び替えて表示する。 */
+</code></pre>
+<ul>
+<li>SQL実行後（内部結合後）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>HOME_ID</th>
+<th>HOME_NAME</th>
+<th>NAME</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>OKAMOTO_KE</td>
+<td>MOCO</td>
+</tr>
+<tr>
+<td>3</td>
+<td>SUZUKI_KE</td>
+<td>CHAMP</td>
+</tr>
+<tr>
+<td>5</td>
+<td>TAKAHASHI_KE</td>
+<td>CHOKO</td>
+</tr>
+<tr>
+<td>6</td>
+<td>NAGASAWA_KE</td>
+<td>TARO</td>
+</tr>
+<tr>
+<td>7</td>
+<td>TAKIMIZU_KE</td>
+<td>RINRIN</td>
+</tr>
+</tbody>
+</table>
+<h3 id="外部結合outer-join">外部結合（OUTER JOIN）</h3>
+<p>外部結合は、結合条件に一致しない行も含めて結果を返す方法である。
+主に以下の3種類がある。</p>
+<h4 id="right-outer-join">RIGHT OUTER JOIN</h4>
+<p>RIGHT OUTER JOINでは、&quot;OUTER JOIN&quot;文の右側にあるテーブルを軸（駆動テーブル）として結合を行う。<br>
+駆動テーブルのテーブルはすべての行が返される。</p>
+<pre><code>SELECT b.HOME_ID , b.HOME_NAME , a.NAME
+  FROM SAMPLE_4_1 a RIGHT OUTER JOIN SAMPLE_4_2 b ON b.PET_ID = a.ID
+ ORDER BY b.HOME_ID ;
+</code></pre>
+<ul>
+<li>SAMPLE4_2を駆動テーブル（軸）として、SAMPLE4_1と結合する</li>
+<li>結合キーはSAMPLE4_2の&quot;PET_ID&quot;とSAMPLE4_1の&quot;ID&quot;</li>
+<li><em>LEFT OUTER JOIN</em>の場合は、左側のテーブルが駆動テーブルとなる</li>
+</ul>
+<h3 id="3つ以上のテーブル結合">3つ以上のテーブル結合</h3>
+<p>3つ以上のテーブルのを結合は、INNNER JOIN/OUTER JOIN構文を複数回実行し、2つのテーブルを結合したテーブルにさらに別のテーブルを結合する、という手法で実現できる。</p>
+<h4 id="3つ以上のテーブルの内部結合">3つ以上のテーブルの内部結合</h4>
+<pre><code>SELECT b.HOME_ID , b.HOME_NAME , a.NAME , c.AREA_NAME
+  FROM ( SAMPLE_4_1 a INNER JOIN SAMPLE_4_2 b ON b.PET_ID  = a.ID )
+                      INNER JOIN SAMPLE_4_3 c ON b.AREA_ID = c.AREA_ID
+</code></pre>
+<ol>
+<li>SAMPLE4_1の&quot;ID&quot;とSAMPLE4_2の&quot;PET_ID&quot;を結合キーとして内部結合をする ←結合テーブル１</li>
+<li>結合テーブル１の&quot;AREA_ID&quot;（元々はSAMPLE4_2の&quot;AREA_ID&quot;）とSAMPLE4_3の&quot;AREA_ID&quot;を結合キーとして内部結合する</li>
+</ol>
+<h4 id="3つ以上のテーブルの外部結合">3つ以上のテーブルの外部結合</h4>
+<pre><code>SELECT b.HOME_ID , b.HOME_NAME , a.NAME , c.AREA_NAME
+  FROM ( SAMPLE_4_1 a RIGHT OUTER JOIN SAMPLE_4_2 b ON b.PET_ID  = a.ID )
+                      LEFT  OUTER JOIN SAMPLE_4_3 c ON b.AREA_ID = c.AREA_ID
+ ORDER BY b.HOME_ID 
+</code></pre>
+<ol>
+<li>SAMPLE_4_2を駆動テーブルとしてSAMPLE4_1と結合。結合キーはSAMPLE4_2の&quot;PET_ID&quot;とSAMPLE4_1の&quot;ID&quot;。　←結合テーブル１</li>
+<li>結合テーブル１を駆動テーブルとしてSAMPLE_4_3と結合。結合キーは結合テーブル１の&quot;AREA_ID&quot;（元々はSAMPLE4_2の&quot;AREA_ID&quot;）とSAMPLE_4_3の&quot;AREA_ID&quot;。</li>
+</ol>
+<p>以上</p>
+
+            
+            
+        </body>
+        </html>
